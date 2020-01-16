@@ -1,6 +1,7 @@
 package com.coditas.parking.service;
 
-import com.coditas.parking.model.MyParking;
+import com.coditas.parking.model.CustomerParking;
+import com.coditas.parking.model.ParkingArea;
 import com.coditas.parking.model.Vehicle;
 import com.coditas.parking.service.exception.ParkingLimitOverflowException;
 
@@ -8,35 +9,29 @@ import java.util.*;
 
 public class ParkingManager {
 
-        private static int totalCapacity;
+    ParkingArea parkingArea;
 
-        private List<MyParking> parkedVehicleList;
-
-        public ParkingManager() {}
+    public ParkingManager() {}
 
      public ParkingManager(int allocateCapacity) {
-        totalCapacity = allocateCapacity;
-        parkedVehicleList = new ArrayList<>(totalCapacity);
+         parkingArea = ParkingArea.getInstance(allocateCapacity);
         int count;
-        for(count = 1; count<= totalCapacity; count++) {
-            MyParking parking = new MyParking();
+        for(count = 1; count<= parkingArea.getParkingCapacity(); count++) {
+            CustomerParking parking = new CustomerParking();
             parking.setParkingId(count);
-            parkedVehicleList.add(parking);
+            parkingArea.getParkedVehicleList().add(parking);
         }
-        System.out.println("Created parking lot with "+totalCapacity +" slots");
+        System.out.println("Created parking lot with "+parkingArea.getParkingCapacity() +" slots");
     }
 
-    public int getTotalCapacity() {
-        return totalCapacity;
-    }
 
     public boolean isParkingAvailable() {
-        return parkedVehicleList.stream().anyMatch(myParking -> (null == myParking.getVehicle()));
+        return parkingArea.getParkedVehicleList().stream().anyMatch(myParking -> (null == myParking.getVehicle()));
     }
 
     public Integer getNextAvailableParkingSlot() {
         Integer parkingId=null;
-        Optional<MyParking> availableParking = parkedVehicleList.stream().filter(myParking ->(null==myParking.getVehicle())).findFirst();
+        Optional<CustomerParking> availableParking = parkingArea.getParkedVehicleList().stream().filter(myParking ->(null==myParking.getVehicle())).findFirst();
         if(availableParking.isPresent())
             parkingId = availableParking.get().getParkingId();
         return parkingId;
@@ -46,9 +41,9 @@ public class ParkingManager {
         if(isParkingAvailable()) {
             Vehicle newVehicle = new Vehicle();
             newVehicle.setRegistrationNumber(vehicleNumber);
-            MyParking availableParking = parkedVehicleList.get(getNextAvailableParkingSlot()-1);
+            CustomerParking availableParking = parkingArea.getParkedVehicleList().get(getNextAvailableParkingSlot()-1);
             availableParking.setVehicle(newVehicle);
-            parkedVehicleList.set(availableParking.getParkingId()-1, availableParking);
+            parkingArea.getParkedVehicleList().set(availableParking.getParkingId()-1, availableParking);
             System.out.println("Allocated slot number: " + availableParking.getParkingId());
         }
         else {
@@ -57,8 +52,8 @@ public class ParkingManager {
     }
 
     public void deAllocateParking(String vehicleNumber,int parkingHrs) {
-        Optional<MyParking> leavingVehicleParking = null;
-        leavingVehicleParking  = parkedVehicleList.stream().filter(myParking->
+        Optional<CustomerParking> leavingVehicleParking;
+        leavingVehicleParking  = parkingArea.getParkedVehicleList().stream().filter(myParking->
                 (vehicleNumber.equalsIgnoreCase(null!=myParking.getVehicle() ? myParking.getVehicle().getRegistrationNumber():""))).findFirst();
         if(leavingVehicleParking.isPresent()) {
             int parkingCharge;
@@ -68,9 +63,9 @@ public class ParkingManager {
             else {
                 parkingCharge = 10 + 10 *(parkingHrs-2);
             }
-            MyParking parking = leavingVehicleParking.get();
+            CustomerParking parking = leavingVehicleParking.get();
             parking.setVehicle(null);
-            parkedVehicleList.set(parking.getParkingId()-1,parking);
+            parkingArea.getParkedVehicleList().set(parking.getParkingId()-1,parking);
             System.out.println(vehicleNumber +" with Slot Number "+parking.getParkingId()+" is free with Charge "+parkingCharge);
         }
         else {
@@ -80,7 +75,7 @@ public class ParkingManager {
 
     public void parkingStatus() {
         System.out.println("Slot No.\t Registration No.");
-        parkedVehicleList.stream().forEach(parking->{
+        parkingArea.getParkedVehicleList().stream().forEach(parking->{
             if(null!=parking.getVehicle()) {
                 System.out.println(parking.getParkingId() + "\t\t" + parking.getVehicle().getRegistrationNumber());
             }
