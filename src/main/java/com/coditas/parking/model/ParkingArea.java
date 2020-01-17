@@ -11,7 +11,7 @@ public class ParkingArea {
 
     public static ParkingArea singleToneInstance;
 
-    public static ParkingArea getInstance(int parkingSize) {
+    public static ParkingArea get(int parkingSize) {
         if (singleToneInstance == null) {
             parkingCapacity = parkingSize;
             parkedVehicleList = new ArrayList<>(parkingCapacity);
@@ -22,10 +22,6 @@ public class ParkingArea {
 
     public static int getParkingCapacity() {
         return parkingCapacity;
-    }
-
-    public static void setParkingCapacity(int parkingCapacity) {
-        ParkingArea.parkingCapacity = parkingCapacity;
     }
 
     public static List<CustomerParking> getParkedVehicleList() {
