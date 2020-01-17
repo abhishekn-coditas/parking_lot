@@ -1,5 +1,6 @@
 package com.coditas.parking;
 
+import com.coditas.parking.model.ParkingArea;
 import com.coditas.parking.service.exception.ParkingLimitOverflowException;
 import com.coditas.parking.service.exception.VehicleNotFoundException;
 
