@@ -22,44 +22,59 @@ public class ParkingManagerServiceTest {
     @InjectMocks
     ParkingManagerService parkingManagerService;
 
-    @Mock
-    ParkingArea parkingArea;
 
     List<CustomerParking> parkedVehicleList;
-
-    @Before
-    public void init() {
-        parkedVehicleList = new ArrayList<>(1);
-        CustomerParking parking = new CustomerParking();
-        parking.setParkingId(1);
-        parkedVehicleList.add(parking);
-        parkingArea.setParkedVehicleList(parkedVehicleList);
-    }
 
     @Test
     public void testCreateParkingArea() {
         parkingManagerService.createParkingArea(2);
-        Assert.assertEquals("Parking not created",parkingArea.getParkingCapacity(),2);
+        Assert.assertEquals("Parking not created",2,ParkingArea.getParkingCapacity());
+        Assert.assertFalse("Parking area must be available",ParkingArea.getParkedVehicleList().isEmpty());
+        ParkingArea.reset();
     }
 
     @Test
     public void testAllocateParking() throws ParkingLimitOverflowException {
-        parkingManagerService.allocateParking("park KA-01-HH-1234");
+        parkingManagerService.createParkingArea(2);
+        parkingManagerService.allocateParking("KA-01-HH-7777");
+        Assert.assertEquals("Vehicle parking failure.","KA-01-HH-7777",ParkingArea.getParkedVehicleList().get(0).getVehicle().getRegistrationNumber());
+        ParkingArea.reset();
     }
 
     @Test
     public void testDeAllocateParking()throws ParkingLimitOverflowException, VehicleNotFoundException {
-        testAllocateParking();
-        parkingManagerService.deAllocateParking("park KA-01-HH-1234",4);
+        parkingManagerService.createParkingArea(2);
+        parkingManagerService.allocateParking("KA-01-HH-2345");
+        parkingManagerService.deAllocateParking("KA-01-HH-2345",4);
+        Assert.assertNull("Parking must be empty.",ParkingArea.getParkedVehicleList().get(0).getVehicle());
+        ParkingArea.reset();
     }
 
     @Test
-    public void testIsParkingAvailable() throws ParkingLimitOverflowException {
+    public void testNextAvailableParkingSlot() {
+        parkingManagerService.createParkingArea(2);
+        Assert.assertEquals("Next available parking id : 1",Integer.valueOf(1),parkingManagerService.getNextAvailableParkingSlot());
+    }
+
+    @Test
+    public void testIsParkingAvailable() {
+        parkingManagerService.createParkingArea(2);
         Assert.assertEquals("Parking is full",parkingManagerService.isParkingAvailable(),Boolean.TRUE);
+        ParkingArea.reset();
     }
 
-    @Test
-    public void testGetNextAvailableParkingSlot() throws ParkingLimitOverflowException {
-        Assert.assertEquals("Incorrect slot",Integer.valueOf(1), Integer.valueOf(parkingManagerService.getNextAvailableParkingSlot()));
+    @Test(expected = ParkingLimitOverflowException.class)
+    public void testParkingIsFull() throws ParkingLimitOverflowException {
+        parkingManagerService.createParkingArea(2);
+        parkingManagerService.allocateParking("KA-01-HH-3456");
+        parkingManagerService.allocateParking("KA-01-HH-4567");
+        parkingManagerService.allocateParking("KA-01-HH-5678");
+    }
+
+    @Test(expected = VehicleNotFoundException.class)
+    public void testUnknownVehicle() throws VehicleNotFoundException {
+        parkingManagerService.createParkingArea(2);
+        parkingManagerService.deAllocateParking("KA-01-HH-2345",4);
+        ParkingArea.reset();
     }
 }

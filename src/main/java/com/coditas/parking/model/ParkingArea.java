@@ -20,6 +20,12 @@ public class ParkingArea {
         return singleToneInstance;
     }
 
+    public static void reset() {
+            parkingCapacity = 0;
+            parkedVehicleList = null;
+            singleToneInstance = null;
+    }
+
     public static int getParkingCapacity() {
         return parkingCapacity;
     }
