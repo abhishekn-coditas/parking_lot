@@ -1,3 +1,5 @@
+package com.coditas.parking;
+
 import com.coditas.parking.IParkingManagerService;
 import com.coditas.parking.service.ParkingManagerService;
 import com.coditas.parking.service.exception.ParkingLimitOverflowException;
