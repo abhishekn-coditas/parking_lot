@@ -1,6 +1,7 @@
 package com.coditas.parking.service;
 
 import com.coditas.parking.IParkingManagerService;
+import com.coditas.parking.constant.Constants;
 import com.coditas.parking.model.CustomerParking;
 import com.coditas.parking.model.ParkingArea;
 import com.coditas.parking.model.Vehicle;
@@ -95,17 +96,17 @@ public class ParkingManagerService implements IParkingManagerService {
                 String command = parameters[0];
                 try {
                     switch (command) {
-                        case "create_parking_lot":
+                        case Constants.CREATE_PARKING_LOT:
                             createParkingArea(Integer.valueOf(parameters[1]));
                             break;
-                        case "park":
+                        case Constants.PARK_VEHICLE:
                             allocateParking(parameters[1]);
                             break;
-                        case "leave":
+                        case Constants.LEAVE_VEHICLE:
                             String secondParameter = line.substring(line.indexOf(" ") + 1);
                             deAllocateParking(parameters[1], Integer.valueOf(parameters[2]));
                             break;
-                        case "status":
+                        case Constants.PARKING_STATUS:
                             parkingStatus();
                             break;
                         default:
